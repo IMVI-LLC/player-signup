@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMVI — Player Sign Up</title>
+<style>
+  :root {
+    --bg: #0b0a08;
+    --panel: #14120e;
+    --gold: #d4af37;
+    --gold-deep: #a8862a;
+    --gold-pale: #f7e08b;
+    --text: #f2ede0;
+    --text-soft: #b8ae95;
+    --line: rgba(212,175,55,0.25);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 3rem 1.25rem 5rem;
+  }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+    color: var(--gold-deep);
+    font-weight: 700;
+    text-align: center;
+    display: block;
+  }
+  h1 {
+    text-align: center;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin: 0.5rem 0 0.4rem;
+  }
+  .tagline {
+    text-align: center;
+    color: var(--gold-pale);
+    font-weight: 700;
+    margin: 0 0 1.75rem;
+    font-size: 1rem;
+  }
+  .intro {
+    color: var(--text-soft);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    text-align: center;
+    margin: 0 0 2.25rem;
+  }
+  form {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 2rem 1.75rem;
+  }
+  label {
+    display: block;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gold-pale);
+    font-weight: 700;
+    margin: 1.1rem 0 0.4rem;
+  }
+  label.first { margin-top: 0; }
+  input, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 0.7rem 0.85rem;
+  }
+  input:focus, textarea:focus {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+  }
+  .checkgrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem 1rem;
+    margin-top: 0.3rem;
+  }
+  .checkgrid label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: var(--text);
+    font-size: 0.92rem;
+    margin: 0;
+  }
+  .checkgrid input[type="checkbox"] { width: auto; }
+  button {
+    width: 100%;
+    margin-top: 2rem;
+    background: linear-gradient(180deg, var(--gold-pale), var(--gold-deep));
+    color: #1a1408;
+    font-weight: 800;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.05); }
+  button:disabled { opacity: 0.6; cursor: default; }
+  .footnote {
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 0.8rem;
+    margin-top: 1.25rem;
+    line-height: 1.5;
+  }
+  .wordmark {
+    text-align: center;
+    margin-top: 2.5rem;
+    color: var(--text-soft);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .status {
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    line-height: 1.5;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.ok { color: var(--gold-pale); }
+  .status.err { color: #e08a7a; }
+  /* honeypot */
+  .hp { position: absolute; left: -9999px; opacity: 0; }
+  input[type="file"] {
+    padding: 0.55rem 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-soft);
+  }
+  input[type="file"]::file-selector-button {
+    background: var(--gold-deep);
+    color: #1a1408;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    padding: 0.45rem 0.8rem;
+    margin-right: 0.7rem;
+    cursor: pointer;
+    font-size: 0.82rem;
+  }
+  .radiogroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.3rem;
+  }
+  .radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .radio-option:has(input:checked) {
+    border-color: var(--gold);
+    background: rgba(212,175,55,0.08);
+  }
+  .radio-option input[type="radio"] {
+    width: auto;
+    margin-top: 0.2rem;
+    accent-color: var(--gold);
+  }
+  .radio-option .radio-label {
+    color: var(--text);
+    font-weight: 700;
+    font-size: 0.94rem;
+  }
+  .radio-option .radio-price {
+    color: var(--gold-pale);
+    font-weight: 800;
+  }
+  .radio-option .radio-sub {
+    color: var(--text-soft);
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+    font-weight: 400;
+  }
+  .subfields {
+    margin-top: 0.9rem;
+    padding: 0.9rem 1rem 0.2rem;
+    border-left: 2px solid var(--line);
+    display: none;
+  }
+  .subfields.show { display: block; }
+  .subfields label { margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">For Players &amp; Families</span>
+  <h1>IMVI — Player Sign Up</h1>
+  <p class="tagline">Card is the Key. App is the World.</p>
+  <p class="intro">Get your player set up with an IMVI card. Fill in a few details, pick your plan, and you'll head straight to secure checkout to finish signing up.</p>
+
+  <form id="playerForm" action="https://formsubmit.co/ajax/info@imvi.me" method="POST">
+    <input type="hidden" name="_subject" value="IMVI Player Sign Up">
+    <input type="hidden" name="_template" value="table">
+    <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
+
+    <label class="first" for="playerName">Player Name</label>
+    <input type="text" id="playerName" name="Player Name" required>
+
+    <label for="parentName">Parent / Guardian Name</label>
+    <input type="text" id="parentName" name="Parent/Guardian Name" required>
+
+    <label for="contactEmail">Email</label>
+    <input type="email" id="contactEmail" name="Email" required>
+
+    <label for="contactPhone">Phone</label>
+    <input type="tel" id="contactPhone" name="Phone">
+
+    <label for="playerAge">Player Age</label>
+    <input type="number" id="playerAge" name="Player Age" min="0" max="25">
+
+    <label>Sport(s)</label>
+    <div class="checkgrid">
+      <label><input type="checkbox" name="Sport(s)" value="Soccer"> Soccer</label>
+      <label><input type="checkbox" name="Sport(s)" value="Basketball"> Basketball</label>
+      <label><input type="checkbox" name="Sport(s)" value="Football"> Football</label>
+      <label><input type="checkbox" name="Sport(s)" value="Flag Football"> Flag Football</label>
+      <label><input type="checkbox" name="Sport(s)" value="Wrestling"> Wrestling</label>
+      <label><input type="checkbox" name="Sport(s)" value="Volleyball"> Volleyball</label>
+      <label><input type="checkbox" name="Sport(s)" value="Softball"> Softball</label>
+      <label><input type="checkbox" name="Sport(s)" value="Baseball"> Baseball</label>
+      <label><input type="checkbox" name="Sport(s)" value="Lacrosse"> Lacrosse</label>
+      <label><input type="checkbox" name="Sport(s)" value="Cheer"> Cheer</label>
+      <label><input type="checkbox" name="Sport(s)" value="Dance"> Dance</label>
+      <label><input type="checkbox" name="Sport(s)" value="Other"> Other</label>
+    </div>
+
+    <label>Club</label>
+    <div class="radiogroup" id="clubGroup">
+      <label class="radio-option">
+        <input type="radio" name="clubChoice" value="imvi" checked>
+        <span>
+          <span class="radio-label">Not with a club — sign me up under IMVI</span>
+        </span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="clubChoice" value="own">
+        <span>
+          <span class="radio-label">I have a club</span>
+        </span>
+      </label>
+    </div>
+    <div class="subfields" id="clubSubfields">
+      <label for="clubName">Club Name</label>
+      <input type="text" id="clubName" name="Club Name">
+      <label for="clubLogo">Club Logo (optional)</label>
+      <input type="file" id="clubLogo" name="Club Logo" accept="image/*,.pdf,.ai,.eps">
+    </div>
+
+    <label>Choose Your Plan</label>
+    <div class="radiogroup" id="planGroup">
+      <label class="radio-option">
+        <input type="radio" name="plan" value="flat50" checked>
+        <span>
+          <span class="radio-label">$50 <span class="radio-price">one-time</span></span>
+          <div class="radio-sub">Pay once, card is yours.</div>
+        </span>
+      </label>
+      <label class="radio-option">
+        <input type="radio" name="plan" value="monthly">
+        <span>
+          <span class="radio-label">$9.99 setup <span class="radio-price">+ $4.99/mo</span></span>
+          <div class="radio-sub">$14.98 charged today, then $4.99 monthly.</div>
+        </span>
+      </label>
+    </div>
+
+    <button type="submit" id="submitBtn">Continue to Payment</button>
+    <p class="status" id="statusMsg"></p>
+    <p class="footnote">You'll be sent straight to secure Stripe checkout to complete sign up.</p>
+  </form>
+
+  <div class="wordmark">IMVI</div>
+</div>
+
+<script>
+const STRIPE_LINKS = {
+  flat50: 'https://buy.stripe.com/3cIeVdblH4S15zbdRxebu03',
+  monthly: null // TODO: add $9.99 setup + $4.99/mo Stripe Payment Link once created
+};
+
+const clubSubfields = document.getElementById('clubSubfields');
+document.getElementById('clubGroup').addEventListener('change', function (e) {
+  const isOwn = e.target.value === 'own';
+  clubSubfields.classList.toggle('show', isOwn);
+  document.getElementById('clubName').required = isOwn;
+});
+
+document.getElementById('playerForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('statusMsg');
+  const sports = Array.from(form.querySelectorAll('input[name="Sport(s)"]:checked')).map(el => el.value);
+  const plan = form.querySelector('input[name="plan"]:checked').value;
+  const stripeUrl = STRIPE_LINKS[plan];
+
+  if (!stripeUrl) {
+    status.textContent = "That plan isn't quite ready yet online — choose the $50 option above, or email info@imvi.me and we'll get you set up on the monthly plan directly.";
+    status.className = 'status show err';
+    return;
+  }
+
+  const data = new FormData(form);
+  data.delete('Sport(s)');
+  data.set('Sport(s)', sports.join(', ') || '(none selected)');
+  data.set('Plan', plan === 'flat50' ? '$50 one-time' : '$9.99 setup + $4.99/mo');
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  status.className = 'status show';
+  status.textContent = 'Sending your info, then redirecting to checkout…';
+  status.classList.remove('err');
+  status.classList.add('ok');
+
+  const goToCheckout = () => { window.location.href = stripeUrl; };
+
+  fetch(form.action, {
+    method: 'POST',
+    headers: { 'Accept': 'application/json' },
+    body: data
+  })
+  .then(goToCheckout)
+  .catch(goToCheckout);
+});
+</script>
+</body>
+</html>
