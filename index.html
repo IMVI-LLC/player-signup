@@ -339,7 +339,16 @@ document.getElementById('playerForm').addEventListener('submit', function (e) {
   status.classList.remove('err');
   status.classList.add('ok');
 
-  const goToCheckout = () => { window.location.href = stripeUrl; };
+  const goToCheckout = () => {
+    const playerName = form.playerName.value.trim();
+    const parentName = form.parentName.value.trim();
+    const email = form.contactEmail.value.trim();
+    const ref = `${playerName} / parent: ${parentName}`.slice(0, 200);
+    const url = new URL(stripeUrl);
+    url.searchParams.set('client_reference_id', ref);
+    if (email) url.searchParams.set('prefilled_email', email);
+    window.location.href = url.toString();
+  };
 
   fetch(form.action, {
     method: 'POST',

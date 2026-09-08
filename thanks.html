@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMVI — You're In</title>
+<style>
+  :root {
+    --bg: #0b0a08;
+    --panel: #14120e;
+    --gold: #d4af37;
+    --gold-deep: #a8862a;
+    --gold-pale: #f7e08b;
+    --text: #f2ede0;
+    --text-soft: #b8ae95;
+    --line: rgba(212,175,55,0.25);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 2rem 1.25rem;
+  }
+  .card {
+    max-width: 480px;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 2.5rem 1.75rem;
+  }
+  .checkmark {
+    font-size: 2.5rem;
+    color: var(--gold-pale);
+    margin-bottom: 0.5rem;
+  }
+  h1 {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+    margin: 0 0 0.6rem;
+  }
+  .tagline {
+    color: var(--gold-pale);
+    font-weight: 700;
+    margin: 0 0 1.5rem;
+    font-size: 0.95rem;
+  }
+  p.body {
+    color: var(--text-soft);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 0.5rem;
+  }
+  .wordmark {
+    margin-top: 2rem;
+    color: var(--text-soft);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="checkmark">&#10003;</div>
+  <h1>You're all set!</h1>
+  <p class="tagline">Card is the Key. App is the World.</p>
+  <p class="body">Your payment went through and your IMVI sign up is complete. Our team will follow up shortly with next steps to get your card built.</p>
+  <p class="body">Questions in the meantime? Email <strong>info@imvi.me</strong>.</p>
+  <div class="wordmark">IMVI</div>
+</div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const plan = params.get('plan') || 'unknown';
+  const sessionId = params.get('session_id') || '(none)';
+  const ref = params.get('client_reference_id') || '(none)';
+
+  const planLabel = plan === 'flat50' ? '$50 one-time'
+                   : plan === 'monthly' ? '$9.99 setup + $4.99/mo'
+                   : plan;
+
+  const data = new FormData();
+  data.set('_subject', 'IMVI Payment Completed — ' + planLabel);
+  data.set('_template', 'table');
+  data.set('Plan', planLabel);
+  data.set('Stripe Session ID', sessionId);
+  data.set('Reference', ref);
+  data.set('Completed At', new Date().toString());
+
+  fetch('https://formsubmit.co/ajax/info@imvi.me', {
+    method: 'POST',
+    headers: { 'Accept': 'application/json' },
+    body: data
+  }).catch(function () { /* best-effort notification only */ });
+})();
+</script>
+</body>
+</html>
