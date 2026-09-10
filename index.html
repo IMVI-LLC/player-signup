@@ -215,11 +215,15 @@
   <p class="tagline">Card is the Key. App is the World.</p>
   <p class="intro">Get your player set up with an IMVI card. Fill in a few details, pick your plan, and you'll head straight to secure checkout to finish signing up.</p>
 
-  <form id="playerForm" action="https://formsubmit.co/ajax/info@imvi.me" method="POST">
+  <form id="playerForm" action="https://formsubmit.co/info@imvi.me" method="POST" enctype="multipart/form-data">
     <input type="hidden" name="_subject" value="IMVI Player Sign Up">
     <input type="hidden" name="_template" value="table">
+    <input type="hidden" name="_captcha" value="false">
+    <input type="hidden" id="nextField" name="_next" value="https://signup.imvi.me/redirect.html?plan=flat50">
     <input type="hidden" name="_autoresponse" value="Thanks for signing up with IMVI! We've received your info — please finish checkout if you haven't already to activate the card. Our team will follow up shortly with next steps. Questions in the meantime? Email info@imvi.me. — The IMVI Team">
     <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off">
+    <input type="hidden" id="sportsField" name="Sport(s)" value="">
+    <input type="hidden" id="planField" name="Plan" value="$50 one-time">
 
     <label class="first" for="playerName">Player Name</label>
     <input type="text" id="playerName" name="Player Name" required>
@@ -237,19 +241,19 @@
     <input type="number" id="playerAge" name="Player Age" min="0" max="25">
 
     <label>Sport(s)</label>
-    <div class="checkgrid">
-      <label><input type="checkbox" name="Sport(s)" value="Soccer"> Soccer</label>
-      <label><input type="checkbox" name="Sport(s)" value="Basketball"> Basketball</label>
-      <label><input type="checkbox" name="Sport(s)" value="Football"> Football</label>
-      <label><input type="checkbox" name="Sport(s)" value="Flag Football"> Flag Football</label>
-      <label><input type="checkbox" name="Sport(s)" value="Wrestling"> Wrestling</label>
-      <label><input type="checkbox" name="Sport(s)" value="Volleyball"> Volleyball</label>
-      <label><input type="checkbox" name="Sport(s)" value="Softball"> Softball</label>
-      <label><input type="checkbox" name="Sport(s)" value="Baseball"> Baseball</label>
-      <label><input type="checkbox" name="Sport(s)" value="Lacrosse"> Lacrosse</label>
-      <label><input type="checkbox" name="Sport(s)" value="Cheer"> Cheer</label>
-      <label><input type="checkbox" name="Sport(s)" value="Dance"> Dance</label>
-      <label><input type="checkbox" name="Sport(s)" value="Other"> Other</label>
+    <div class="checkgrid" id="sportsGrid">
+      <label><input type="checkbox" value="Soccer"> Soccer</label>
+      <label><input type="checkbox" value="Basketball"> Basketball</label>
+      <label><input type="checkbox" value="Football"> Football</label>
+      <label><input type="checkbox" value="Flag Football"> Flag Football</label>
+      <label><input type="checkbox" value="Wrestling"> Wrestling</label>
+      <label><input type="checkbox" value="Volleyball"> Volleyball</label>
+      <label><input type="checkbox" value="Softball"> Softball</label>
+      <label><input type="checkbox" value="Baseball"> Baseball</label>
+      <label><input type="checkbox" value="Lacrosse"> Lacrosse</label>
+      <label><input type="checkbox" value="Cheer"> Cheer</label>
+      <label><input type="checkbox" value="Dance"> Dance</label>
+      <label><input type="checkbox" value="Other"> Other</label>
     </div>
 
     <label>Club</label>
@@ -314,50 +318,34 @@ document.getElementById('clubGroup').addEventListener('change', function (e) {
 });
 
 document.getElementById('playerForm').addEventListener('submit', function (e) {
-  e.preventDefault();
   const form = e.target;
-  const btn = document.getElementById('submitBtn');
   const status = document.getElementById('statusMsg');
-  const sports = Array.from(form.querySelectorAll('input[name="Sport(s)"]:checked')).map(el => el.value);
+  const sports = Array.from(form.querySelectorAll('#sportsGrid input[type="checkbox"]:checked')).map(el => el.value);
   const plan = form.querySelector('input[name="plan"]:checked').value;
-  const stripeUrl = STRIPE_LINKS[plan];
 
-  if (!stripeUrl) {
+  if (!STRIPE_LINKS[plan]) {
+    e.preventDefault();
     status.textContent = "That plan isn't quite ready yet online — choose the $50 option above, or email info@imvi.me and we'll get you set up on the monthly plan directly.";
     status.className = 'status show err';
     return;
   }
 
-  const data = new FormData(form);
-  data.delete('Sport(s)');
-  data.set('Sport(s)', sports.join(', ') || '(none selected)');
-  data.set('Plan', plan === 'flat50' ? '$50 one-time' : '$9.99 setup + $4.99/mo');
+  document.getElementById('sportsField').value = sports.join(', ') || '(none selected)';
+  document.getElementById('planField').value = plan === 'flat50' ? '$50 one-time' : '$9.99 setup + $4.99/mo';
 
-  btn.disabled = true;
-  btn.textContent = 'Sending…';
-  status.className = 'status show';
-  status.textContent = 'Sending your info, then redirecting to checkout…';
-  status.classList.remove('err');
-  status.classList.add('ok');
+  const playerName = form.playerName.value.trim();
+  const parentName = form.parentName.value.trim();
+  const email = form.contactEmail.value.trim();
+  const ref = `${playerName} / parent: ${parentName}`.slice(0, 200);
 
-  const goToCheckout = () => {
-    const playerName = form.playerName.value.trim();
-    const parentName = form.parentName.value.trim();
-    const email = form.contactEmail.value.trim();
-    const ref = `${playerName} / parent: ${parentName}`.slice(0, 200);
-    const url = new URL(stripeUrl);
-    url.searchParams.set('client_reference_id', ref);
-    if (email) url.searchParams.set('prefilled_email', email);
-    window.location.href = url.toString();
-  };
+  const nextUrl = new URL('https://signup.imvi.me/redirect.html');
+  nextUrl.searchParams.set('plan', plan);
+  nextUrl.searchParams.set('client_reference_id', ref);
+  if (email) nextUrl.searchParams.set('prefilled_email', email);
+  document.getElementById('nextField').value = nextUrl.toString();
 
-  fetch(form.action, {
-    method: 'POST',
-    headers: { 'Accept': 'application/json' },
-    body: data
-  })
-  .then(goToCheckout)
-  .catch(goToCheckout);
+  document.getElementById('submitBtn').textContent = 'Sending…';
+  // native form submission proceeds — FormSubmit emails the team, then redirects to redirect.html above
 });
 </script>
 </body>

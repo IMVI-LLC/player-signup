@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMVI — Redirecting to Checkout</title>
+<style>
+  :root {
+    --bg: #0b0a08;
+    --panel: #14120e;
+    --gold-pale: #f7e08b;
+    --text: #f2ede0;
+    --text-soft: #b8ae95;
+    --line: rgba(212,175,55,0.25);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    padding: 2rem 1.25rem;
+  }
+  .card {
+    max-width: 420px;
+    text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 2.5rem 1.75rem;
+  }
+  h1 { font-size: clamp(1.2rem, 4vw, 1.5rem); margin: 0 0 0.6rem; }
+  p { color: var(--text-soft); font-size: 0.9rem; line-height: 1.6; margin: 0; }
+  a { color: var(--gold-pale); }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Redirecting you to secure checkout&hellip;</h1>
+  <p>If this takes more than a few seconds, <a id="manualLink" href="#">click here</a>.</p>
+</div>
+
+<script>
+const STRIPE_LINKS = {
+  flat50: 'https://buy.stripe.com/3cIeVdblH4S15zbdRxebu03',
+  monthly: 'https://buy.stripe.com/3cI00j4XjcktbXz7t9ebu04'
+};
+
+const params = new URLSearchParams(window.location.search);
+const plan = params.get('plan') || 'flat50';
+const base = STRIPE_LINKS[plan] || STRIPE_LINKS.flat50;
+
+const url = new URL(base);
+const ref = params.get('client_reference_id');
+const email = params.get('prefilled_email');
+if (ref) url.searchParams.set('client_reference_id', ref);
+if (email) url.searchParams.set('prefilled_email', email);
+
+document.getElementById('manualLink').href = url.toString();
+window.location.href = url.toString();
+</script>
+</body>
+</html>
