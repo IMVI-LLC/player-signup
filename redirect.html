@@ -60,6 +60,15 @@ const email = params.get('prefilled_email');
 if (ref) url.searchParams.set('client_reference_id', ref);
 if (email) url.searchParams.set('prefilled_email', email);
 
+if (ref) {
+  fetch('https://imvi-checkout-reminders.imvillc.workers.dev/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    keepalive: true,
+    body: JSON.stringify({ reference_id: ref, email: email || null, name: ref, plan: plan })
+  }).catch(function () { /* best-effort — never blocks checkout */ });
+}
+
 document.getElementById('manualLink').href = url.toString();
 window.location.href = url.toString();
 </script>

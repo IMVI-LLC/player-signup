@@ -99,6 +99,14 @@
     headers: { 'Accept': 'application/json' },
     body: data
   }).catch(function () { /* best-effort notification only */ });
+
+  if (ref !== '(none)') {
+    fetch('https://imvi-checkout-reminders.imvillc.workers.dev/paid', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reference_id: ref })
+    }).catch(function () { /* best-effort — stops reminders once matched */ });
+  }
 })();
 </script>
 </body>
