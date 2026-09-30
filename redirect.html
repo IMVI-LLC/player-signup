@@ -61,12 +61,23 @@ if (ref) url.searchParams.set('client_reference_id', ref);
 if (email) url.searchParams.set('prefilled_email', email);
 
 if (ref) {
-  fetch('https://imvi-checkout-reminders.imvillc.workers.dev/start', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    keepalive: true,
-    body: JSON.stringify({ reference_id: ref, email: email || null, name: ref, plan: plan })
-  }).catch(function () { /* best-effort — never blocks checkout */ });
+  const payload = JSON.stringify({ reference_id: ref, email: email || null, name: ref, plan: plan });
+  // sendBeacon is built for exactly this case (fire a request right before the page
+  // navigates away) and survives the navigation reliably on mobile Safari, where a
+  // plain fetch()+keepalive call can get cancelled mid-flight.
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon(
+      'https://imvi-checkout-reminders.imvillc.workers.dev/start',
+      new Blob([payload], { type: 'text/plain' })
+    );
+  } else {
+    fetch('https://imvi-checkout-reminders.imvillc.workers.dev/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: payload
+    }).catch(function () { /* best-effort — never blocks checkout */ });
+  }
 }
 
 document.getElementById('manualLink').href = url.toString();
